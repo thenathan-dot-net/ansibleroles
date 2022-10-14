@@ -1,0 +1,38 @@
+---
+# tasks file for apache
+# 
+# tasks file for apache
+- name: Install the latest version of httpd
+  ansible.builtin.dnf:
+    name: httpd
+    state: latest
+
+- name: permit traffic to http
+  ansible.posix.firewalld:
+    port: 80/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: permit traffic to https
+  ansible.posix.firewalld:
+    port: 443/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Push index.html
+  ansible.builtin.copy:
+    src: index.html
+    dest: /var/www/html/index.html
+    group: apache
+    owner: apache
+    mode: '0644'
+
+- name: Template configuration httpd
+  ansible.builtin.template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+  notify:
+    - Restart apache
+
